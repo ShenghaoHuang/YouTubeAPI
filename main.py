@@ -35,7 +35,9 @@ def api_request(page_token, country_code):
     if request.status_code == 429:
         print("Temp-Banned due to excess requests, please wait and continue later")
         sys.exit()
-    return request.json()
+    request_title_url = f"https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode={country_codes}&key={api_key}"
+    request_title = requests.get(request_title_url)
+    return request.json(), request_title.json()
 
 def get_tags(tags_list):
     # Takes a list of tags, prepares each tag and joins them into a string by the pipe character
@@ -103,7 +105,7 @@ def get_pages(country_code, next_page_token="&"):
     # more inconvenient to iterate over pages, but that is what is done here.
     while next_page_token is not None:
         # A page of data i.e. a list of videos and all needed data
-        video_data_page = api_request(next_page_token, country_code)
+        video_data_page, video_category = api_request(next_page_token, country_code)
 
         # Get the next page token and build a string which can be injected into the request with it, unless it's None,
         # then let the whole thing be None so that the loop ends after this cycle
@@ -150,4 +152,5 @@ if __name__ == '__main__':
     api_key, country_codes = setup(args.key_path, args.country_code_path)
 
     get_data()
+
 
